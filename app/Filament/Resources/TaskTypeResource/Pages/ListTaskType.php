@@ -4,14 +4,16 @@ namespace App\Filament\Resources\TaskTypeResource\Pages;
 
 use App\Filament\Resources\TaskTypeResource;
 use Filament\Actions;
-use Filament\Resources\Pages\CreateRecord;
+use Filament\Resources\Pages\ListRecords;
 
-class CreateTaskTypes extends CreateRecord
+class ListTaskType extends ListRecords
 {
     protected static string $resource = TaskTypeResource::class;
 
-    protected function getRedirectUrl(): string
+    protected function getHeaderActions(): array
     {
-        return $this->getResource()::getUrl('index');
+        return [
+            Actions\CreateAction::make(),
+        ];
     }
 }

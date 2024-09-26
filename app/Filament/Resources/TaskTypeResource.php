@@ -72,9 +72,9 @@ class TaskTypeResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListTaskTypes::route('/'),
-            'create' => Pages\CreateTaskTypes::route('/create'),
-            'edit' => Pages\EditTaskTypes::route('/{record}/edit'),
+            'index' => Pages\ListTaskType::route('/'),
+            'create' => Pages\CreateTaskType::route('/create'),
+            'edit' => Pages\EditTaskType::route('/{record}/edit'),
         ];
     }
 }
