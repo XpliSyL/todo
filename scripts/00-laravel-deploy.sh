@@ -2,6 +2,8 @@
 echo "Running composer"
 composer install --working-dir=/var/www/html
 
+npm run prod
+
 echo "Caching config..."
 php artisan config:cache
 
