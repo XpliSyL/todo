@@ -55,7 +55,7 @@ class ContactResource extends Resource
                         TextInput::make('name')
                     ])
                     ->preload()
-                    ->required(),
+                    ->label('Étiquettes'),
                 TextInput::make('phone')
                     ->label('Téléphone'),
                 TextInput::make('email')
