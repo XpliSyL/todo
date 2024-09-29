@@ -15,6 +15,7 @@ class CreateContactTagTable extends Migration
             $table->id();
             $table->foreignId('contact_id')->constrained(); //
             $table->foreignId('tag_id')->constrained();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

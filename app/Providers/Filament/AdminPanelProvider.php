@@ -28,6 +28,7 @@ class AdminPanelProvider extends PanelProvider
 
     public function panel(Panel $panel): Panel
     {
+        //Ajout bouton nouvelle tâche/contact/document
         return $panel
             ->default()
             ->id('admin')
@@ -63,6 +64,7 @@ class AdminPanelProvider extends PanelProvider
                 'Tasks',
                 'Blog',
                 'Settings',
-            ]);
+            ])
+            ->databaseNotifications();
     }
 }

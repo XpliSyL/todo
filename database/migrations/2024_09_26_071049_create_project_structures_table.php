@@ -17,7 +17,8 @@ return new class extends Migration
             $table->unsignedBigInteger('parent_id')->nullable();
             $table->integer('order')->default(0);
 
-            $table->foreign('parent_id')->references('id')->on('project_structures')->onDelete('cascade');
+            $table->foreign('parent_id')->references('id')->on('project_structures');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

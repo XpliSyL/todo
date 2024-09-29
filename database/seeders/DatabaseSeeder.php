@@ -62,13 +62,8 @@ class DatabaseSeeder extends Seeder
         $tag->type = 'Document';
         $tag->save();
 
-        $d = new \App\Models\Document();
-        $d->name = 'ProDoc Serment de Genève';
-        $d->link = 'https://docs.google.com/document/u/0/d/1hJ0gJZ81RVj5jIIncr1i5T7p51_Rkw4olpdsgXk7bYI/mobilebasic?invite=CPbd8-oH&pli=1#';
-        $d->save();
-
         $c = new \App\Models\Contact();
-        $c->first_name = 'Alfonso';
+        $c->name = 'Alfonso';
         $c->last_name = 'Gomez';
         $c->job_title = 'Conseiller municipal Genève';
         $c->phone = '+41 79 400 54 54';

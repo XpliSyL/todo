@@ -34,14 +34,21 @@ class ProjectStructureSeeder extends Seeder
         ProjectStructure::create(['name' => 'Scientifiques', 'parent_id' => $organiserSoirée->id, 'order' => 2]);
         ProjectStructure::create(['name' => 'Agences Onusiennes', 'parent_id' => $organiserSoirée->id, 'order' => 3]);
 
-        $d = new \App\Models\Task();
-        $d->project_structure_id = $l->id;
-        $d->user_id = 1;
-        $d->task_types_id = 1;
-        $d->title = 'Contacter Alfonso Gomez';
-        $d->details = "Prendre rdv avec Sandrine (sa secrétaire)\nRegarder comment ils entrent en matière (5 lignes)\n1\n2\n3\n4\n5";
-        $d->status = 'todo';
-        $d->due_date = '2024.10.5';
+        $t = new \App\Models\Task();
+        $t->project_structure_id = $l->id;
+        $t->user_id = 1;
+        $t->task_types_id = 1;
+        $t->contact_id = 1;
+        $t->name = 'Contacter Alfonso Gomez';
+        $t->details = "Prendre rdv avec Sandrine (sa secrétaire)\nRegarder comment ils entrent en matière (5 lignes)\n1\n2\n3\n4\n5";
+        $t->status = 'todo';
+        $t->due_date = '2024.10.5';
+        $t->save();
+
+        $d = new \App\Models\Document();
+        $d->name = 'ProDoc Serment de Genève';
+        $d->link = 'https://docs.google.com/document/u/0/d/1hJ0gJZ81RVj5jIIncr1i5T7p51_Rkw4olpdsgXk7bYI/mobilebasic?invite=CPbd8-oH&pli=1#';
+        $d->task_id = $t->id;
         $d->save();
     }
 }

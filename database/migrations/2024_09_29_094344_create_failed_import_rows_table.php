@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('documents', function (Blueprint $table) {
+        Schema::create('failed_import_rows', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('link'); // Lien vers Google Drive
-            // $table->foreignId('project_structure_id')->constrained(); // Relation avec la structure
+            $table->json('data');
+            $table->foreignId('import_id')->constrained()->cascadeOnDelete();
+            $table->text('validation_error')->nullable();
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('documents');
+        Schema::dropIfExists('failed_import_rows');
     }
 };

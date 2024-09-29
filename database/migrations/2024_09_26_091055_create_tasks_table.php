@@ -16,10 +16,12 @@ return new class extends Migration
             $table->foreignId('project_structure_id')->constrained();
             $table->foreignId('user_id')->constrained();
             $table->foreignId('task_types_id')->constrained();
-            $table->string('title');
+            $table->string('name');
             $table->text('details');
             $table->enum('status', ['draft', 'todo', 'waiting', 'done']);
             $table->date('due_date');
+            $table->foreignId('contact_id')->constrained();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

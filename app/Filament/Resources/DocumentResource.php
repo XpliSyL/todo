@@ -45,6 +45,10 @@ class DocumentResource extends Resource
                 TextInput::make('link')
                     ->label('Lien Google Drive')
                     ->url(),
+                Select::make('task_id')
+                    ->relationship('task', 'name')
+                    ->label('Tâche')
+                    ->required(),
             ]);
     }
 
@@ -56,10 +60,14 @@ class DocumentResource extends Resource
                     ->label('Nom du Document')
                     ->sortable()
                     ->searchable(),
+                TextColumn::make('task.name')
+                    ->label('Tâche')
+                    ->searchable(),
                 TextColumn::make('link')
                     ->label('Lien')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->limit(50),
             ])
             ->actions([
                 ActionGroup::make([

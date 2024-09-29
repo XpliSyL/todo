@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Exports\ContactExporter;
 use App\Filament\Resources\ContactResource\Pages;
 use App\Filament\Resources\ContactResource\RelationManagers;
 use App\Models\Contact;
+use App\Models\Entity;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -23,6 +25,8 @@ use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\ExportAction;
+use Filament\Tables\Actions\ExportBulkAction;
 use Filament\Tables\Actions\ViewAction;
 
 class ContactResource extends Resource
@@ -35,7 +39,7 @@ class ContactResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('first_name')
+                TextInput::make('name')
                     ->label('Prénom')
                     ->required(),
                 TextInput::make('last_name')
@@ -47,7 +51,11 @@ class ContactResource extends Resource
                 Select::make('entity_id')
                     ->relationship('entity', 'name')
                     ->label('Entité')
-                    ->required(),
+                    ->createOptionForm([
+                        TextInput::make('name')
+                    ])
+                    ->searchable()
+                    ->preload(),
                 Select::make('tags')
                     ->relationship('tags', 'name')
                     ->multiple()
@@ -70,17 +78,41 @@ class ContactResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->headerActions([
+                ExportAction::make()
+                    ->exporter(ContactExporter::class)
+            ])
             ->columns([
-                TextColumn::make('first_name')
-                    ->label('Prénom')->searchable(),
+                TextColumn::make('name')
+                    ->label('Prénom')
+                    ->searchable(),
                 TextColumn::make('last_name')
-                    ->label('Nom')->searchable(),
+                    ->label('Nom')
+                    ->searchable(['last_name', 'email']),
                 TextColumn::make('entity.name')
-                    ->label('Entité')->searchable(),
+                    ->label('Entité')
+                    ->searchable(),
             ])
             ->filters([
-                SelectFilter::make('first_name')
-                    ->label('Filtrer par Prénom'),
+                SelectFilter::make('tag_id')
+                    ->label('Filtrer par étiquette')
+                    ->relationship('tags', 'name'),
+                SelectFilter::make('entity_id')
+                    ->label('Filtrer par entité')
+                    ->relationship('entity', 'name'),
+            ])
+            ->actions([
+                ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ]),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    ExportBulkAction::make()
+                        ->exporter(ContactExporter::class),
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 

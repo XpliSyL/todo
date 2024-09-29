@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Enums\TaskStatus;
+use App\Filament\Exports\TaskExporter;
 use App\Filament\Resources\TaskResource\Pages;
 use App\Filament\Resources\TaskResource\Pages\CreateTask;
 use App\Filament\Resources\TaskResource\Pages\EditTask;
@@ -13,17 +14,25 @@ use App\Models\Task;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Tables\Actions\EditAction;
 use Filament\Forms;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\MorphToSelect;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\AssociateAction;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\ExportAction;
+use Filament\Tables\Actions\ExportBulkAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -45,7 +54,9 @@ class TaskResource extends Resource
     {
         return $form
             ->schema([
-
+                TextInput::make('name')
+                    ->label('Titre')
+                    ->required(),
                 SelectTree::make('project_structure_id')
                     ->relationship('project_structure', 'name', 'parent_id')
                     ->label('Structure de projet')
@@ -54,8 +65,9 @@ class TaskResource extends Resource
                     ->relationship('responsable', 'name')
                     ->label('Responsable')
                     ->required(),
-                TextInput::make('title')
-                    ->label('Titre')
+                Select::make('contact_id')
+                    ->relationship('contact', 'name')
+                    ->label('Contact')
                     ->required(),
                 Textarea::make('details')
                     ->label('Détail')
@@ -66,10 +78,19 @@ class TaskResource extends Resource
                     ->required()
                     ->createOptionForm([
                         TextInput::make('type')
-                    ]),
+                    ])
+                    ->searchable()
+                    ->preload(),
                 DatePicker::make('due_date')
                     ->label('Date d’échéance')
                     ->required(),
+                Repeater::make('documents')
+                    ->relationship()
+                    ->schema([
+                        TextInput::make('name')->required(),
+                        TextInput::make('link')->required(),
+                    ])
+                    ->columns(2),
                 Select::make('status')
                     ->label('État')
                     ->options(TaskStatus::class)
@@ -80,15 +101,22 @@ class TaskResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->headerActions([
+                ExportAction::make()
+                    ->exporter(TaskExporter::class),
+            ])
             ->columns([
                 TextColumn::make('responsable.name')
                     ->label('Responsable')
                     ->searchable(),
-                TextColumn::make('title')
+                TextColumn::make('name')
                     ->label('Titre')
                     ->searchable(),
                 TextColumn::make('project_structure.name')
                     ->label('Niveau de Structure')
+                    ->searchable(),
+                TextColumn::make('contact.name')
+                    ->label('Contact')
                     ->searchable(),
                 TextColumn::make('due_date')
                     ->label('Date d’échéance')
@@ -100,7 +128,6 @@ class TaskResource extends Resource
                     ->badge(),
             ])
             ->filters([
-                // Filtres par responsable ou par niveau de structure
                 SelectFilter::make('responsable_id')
                     ->label('Filtrer par Responsable')
                     ->relationship('responsable', 'name'),
@@ -110,14 +137,18 @@ class TaskResource extends Resource
                 SelectFilter::make('status')
                     ->options(TaskStatus::class)
             ])
+            //todo add linked strucutre projet task on click on strucutre de projet
             ->actions([
                 ActionGroup::make([
+                    ViewAction::make(),
                     EditAction::make(),
                     DeleteAction::make(),
                 ]),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
+                    ExportBulkAction::make()
+                        ->exporter(TaskExporter::class),
                     DeleteBulkAction::make(),
                 ]),
             ]);

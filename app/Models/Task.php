@@ -5,15 +5,17 @@ namespace App\Models;
 use App\Enums\TaskStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Task extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'project_structure_id',
         'user_id',
-        'title',
+        'name',
         'details',
         'due_date',
         'status',
@@ -37,6 +39,16 @@ class Task extends Model
 
     public function type()
     {
-        return $this->hasOne(TaskType::class);
+        return $this->belongsTo(TaskType::class, 'task_types_id');
+    }
+
+    public function documents()
+    {
+        return $this->hasMany(Document::class);
+    }
+
+    public function contact()
+    {
+        return $this->belongsTo(Contact::class);
     }
 }
