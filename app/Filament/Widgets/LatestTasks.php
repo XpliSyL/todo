@@ -18,6 +18,7 @@ use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Tables\Actions\EditAction;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -44,13 +45,11 @@ use Illuminate\Database\Eloquent\Builder;
 class LatestTasks extends BaseWidget
 
 {
-
     protected static ?string $model = Task::class;
 
+    public ?Model $record = null;
+
     protected int | string | array $columnSpan = 'full';
-    protected static ?string $navigationLabel = 'Vos tâche';
-    protected static ?string $pluralModelLabel = 'Vos tâches';
-    protected static ?string $modelLabel = 'Vos tâches';
 
     // Needed by InteractsWithPageTable trait.
     // Query to fetch tasks that are not done, ordered by the latest first
@@ -71,19 +70,27 @@ class LatestTasks extends BaseWidget
                     ->label('Niveau de Structure')
                     ->searchable()
                     ->sortable(),
+
                 TextColumn::make('responsable.name')
                     ->label('Responsable')
                     ->searchable()
                     ->sortable(),
+
                 TextColumn::make('due_date')
                     ->label('Date d’échéance')
                     ->searchable()
                     ->sortable(),
+
                 TextColumn::make('status')
                     ->label('État')
                     ->searchable()
                     ->badge(),
-            ])->filters([
+
+            ])
+            ->recordUrl(
+                fn(Task $record): string => TaskResource::getUrl('edit', ['record' => $record]),
+            )
+            ->filters([
                 //Todo set à faire par défaut
                 //ajouter filtre user par défaut le sien, et tout les autres
                 //
@@ -119,15 +126,56 @@ class LatestTasks extends BaseWidget
                     ->options(TaskStatus::class)
             ])
             ->actions([
-                ActionGroup::make([
-                    ViewAction::make(),
-                    EditAction::make(),
-                    DeleteAction::make(),
-                ]),
-                Action::make('view')
-                    ->action(function (Task $record) {
-                        dd($record);
-                    })
+                // ActionGroup::make([
+                // ViewAction::make()->url(fn(Task $record): string => TaskResource::getUrl('view', ['record' => $record])),
+                // EditAction::make(),
+                ViewAction::make()
+                    ->form([
+                        TextInput::make('name')
+                            ->label('Titre')
+                            ->required(),
+                        SelectTree::make('project_structure_id')
+                            ->relationship('project_structure', 'name', 'parent_id')
+                            ->label('Structure de projet')
+                            ->required(),
+                        // ->url(fn(ProjectStructure $record): string => ProjectStructureResource::getUrl('edit', ['record' => $record])),
+                        Select::make('user_id')
+                            ->relationship('responsable', 'name')
+                            ->label('Responsable')
+                            ->required(),
+                        Select::make('contact_id')
+                            ->relationship('contact', 'name')
+                            ->label('Contact')
+                            ->required(),
+                        Textarea::make('details')
+                            ->label('Détail')
+                            ->rows(5),
+                        Select::make('task_types_id')
+                            ->relationship('type', 'type')
+                            ->label('Type')
+                            ->required()
+                            ->createOptionForm([
+                                TextInput::make('type')
+                            ])
+                            ->searchable()
+                            ->preload(),
+                        DatePicker::make('due_date')
+                            ->label('Date d’échéance')
+                            ->required(),
+                        Repeater::make('documents')
+                            ->relationship()
+                            ->schema([
+                                TextInput::make('name')->required(),
+                                TextInput::make('link')->required(),
+                            ])
+                            ->columns(2),
+                        Select::make('status')
+                            ->label('État')
+                            ->options(TaskStatus::class)
+                            ->required(),
+                    ]),
+                DeleteAction::make(),
+                // ]),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

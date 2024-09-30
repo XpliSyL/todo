@@ -139,11 +139,55 @@ class TaskResource extends Resource
             ])
             //todo add linked strucutre projet task on click on strucutre de projet
             ->actions([
-                ActionGroup::make([
-                    ViewAction::make(),
-                    EditAction::make(),
-                    DeleteAction::make(),
-                ]),
+                // ActionGroup::make([
+                ViewAction::make()
+                    ->form([
+                        TextInput::make('name')
+                            ->label('Titre')
+                            ->required(),
+                        SelectTree::make('project_structure_id')
+                            ->relationship('project_structure', 'name', 'parent_id')
+                            ->label('Structure de projet')
+                            ->required(),
+                        // ->url(fn(ProjectStructure $record): string => ProjectStructureResource::getUrl('edit', ['record' => $record])),
+                        Select::make('user_id')
+                            ->relationship('responsable', 'name')
+                            ->label('Responsable')
+                            ->required(),
+                        Select::make('contact_id')
+                            ->relationship('contact', 'name')
+                            ->label('Contact')
+                            ->required(),
+                        Textarea::make('details')
+                            ->label('Détail')
+                            ->rows(5),
+                        Select::make('task_types_id')
+                            ->relationship('type', 'type')
+                            ->label('Type')
+                            ->required()
+                            ->createOptionForm([
+                                TextInput::make('type')
+                            ])
+                            ->searchable()
+                            ->preload(),
+                        DatePicker::make('due_date')
+                            ->label('Date d’échéance')
+                            ->required(),
+                        Repeater::make('documents')
+                            ->relationship()
+                            ->schema([
+                                TextInput::make('name')->required(),
+                                TextInput::make('link')->required(),
+                            ])
+                            ->columns(2),
+                        Select::make('status')
+                            ->label('État')
+                            ->options(TaskStatus::class)
+                            ->required(),
+                    ]),
+                EditAction::make(),
+                DeleteAction::make(),
+                // ]),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
@@ -152,6 +196,26 @@ class TaskResource extends Resource
                     DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public function showTasksModal($userId)
+    {
+        $tasks = Task::where('user_id', $userId)->get();
+
+        // Pass tasks to the modal
+        return $this->dialog()
+            ->heading('Tasks for User')
+            ->description('Here are the tasks associated with the selected user.')
+            ->form([
+                // Display tasks in the modal, customize as necessary
+                Table::make($tasks)
+                    ->columns([
+                        TextColumn::make('name')->label('Task Name'),
+                        TextColumn::make('status')->label('Status'),
+                        // Add other columns as needed
+                    ]),
+            ])
+            ->open();
     }
 
     public static function getRelations(): array
